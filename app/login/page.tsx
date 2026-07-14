@@ -8,133 +8,115 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect:false,
-    })
 
-    if(result?.error) {
-      console.log(result.error)
-    } else {
-      router.push("/")
+    setLoading(true);
+
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        console.log(result.error);
+      } else {
+        router.push("/");
+      }
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
-  // return (
-  //   <div>
-  //     <h1>Login</h1>
-  //     <form onSubmit={handleSubmit}>
-  //       <input 
-  //       type="email" 
-  //       value={email}
-  //       onChange={(e) => setEmail(e.target.value)}
-  //       />
-  //       <input 
-  //       type="password"
-  //       value={password}
-  //       onChange={(e) => setPassword(e.target.value)}
-  //       />
-  //       <button type="submit">Login</button>
-  //     </form>
-
-  //     {/* <div>
-  //       <button onClick={() => signIn("google")}>
-  //         Sign in with Google
-  //       </button>
-  //     </div> */}
-
-  //     <div>
-  //       Don&apos;t have an account ?
-  //       <button onClick={() => router.push('/register')}>Register</button>
-  //     </div>
-      
-  //   </div>
-  // )
-
-
-
-
-
-
-
-  
   return (
-  <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-    <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
-      <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold text-gray-900">Welcome Back</h1>
-        <p className="mt-2 text-sm text-gray-500">
-          Sign in to continue to your account
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+      <div className="w-full max-w-md">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-slate-900 flex justify-center items-center">
+            Sign In
+          </h1>
+
+          <p className="mt-2 text-slate-500 flex justify-center items-center">
+            Welcome back! Please enter your details.
+          </p>
+        </div>
+
+        {/* Card */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-xl shadow-slate-200/40">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">
+                Email
+              </label>
+
+              <input
+                type="email"
+                placeholder="name@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100 outline-none"
+              />
+            </div>
+
+            <div>
+              <div className="mb-2 flex justify-between">
+                <label className="text-sm font-medium text-slate-700">
+                  Password
+                </label>
+
+                <button
+                  type="button"
+                  className="text-sm text-violet-600 hover:text-violet-700"
+                >
+                  Forgot?
+                </button>
+              </div>
+
+              <input
+                type="password"
+                placeholder="Enter password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100 outline-none"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full rounded-xl bg-violet-600 py-3 font-semibold text-white transition hover:bg-violet-700"
+            >
+              Sign In
+            </button>
+          </form>
+
+          <div className="relative my-6">
+            <div className="border-t border-slate-200"></div>
+            <span className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-3 text-sm text-slate-400">
+              OR
+            </span>
+          </div>
+
+          <button className="w-full rounded-xl border border-slate-300 bg-white py-3 font-medium text-slate-700 transition hover:bg-slate-100">
+            Continue with Google
+          </button>
+        </div>
+
+        <p className="mt-6 text-center text-sm text-slate-600">
+          Don&apost have an account?{" "}
+          <button
+            onClick={() => router.push("/register")}
+            className="font-semibold text-violet-600 hover:text-violet-700"
+          >
+            Create one
+          </button>
         </p>
       </div>
-
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">
-            Email
-          </label>
-          <input
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-4 py-3 text-black placeholder:text-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-          />
-        </div>
-
-        <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700">
-            Password
-          </label>
-          <input
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-4 py-3 text-black placeholder:text-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="w-full rounded-lg bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700"
-        >
-          Sign In
-        </button>
-      </form>
-
-      {/* Uncomment if you want Google Sign In */}
-      {/* 
-      <div className="mt-6">
-        <button
-          onClick={() => signIn("google")}
-          className="w-full rounded-lg border border-gray-300 py-3 font-medium text-gray-700 transition hover:bg-gray-100"
-        >
-          Continue with Google
-        </button>
-      </div>
-      */}
-
-      <div className="mt-6 text-center text-sm text-gray-600">
-        Don&apos;t have an account?{" "}
-        <button
-          onClick={() => router.push("/register")}
-          className="font-semibold text-blue-600 hover:underline"
-        >
-          Register
-        </button>
-      </div>
     </div>
-  </div>
-);
-
-
-
+  );
 }
 
-export default LoginPage
+export default LoginPage;
