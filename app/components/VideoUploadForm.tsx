@@ -1,13 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ComponentType } from "react";
 import { useRouter } from "next/navigation";
 import FileUpload from "./FileUpload";
 
 interface UploadResponse {
-  url: string;
-  filePath: string;
+  url?: string;
+  filePath?: string;
 }
+
+type FileUploadProps = {
+  fileType: "video" | "image";
+  onSuccess: (res: UploadResponse) => void;
+  onProgress?: (progress: number) => void;
+};
+
+const TypedFileUpload = FileUpload as ComponentType<FileUploadProps>;
 
 export default function VideoUploadForm() {
   const router = useRouter();
@@ -18,18 +26,17 @@ export default function VideoUploadForm() {
   const [videoUrl, setVideoUrl] = useState("");
   const [thumbnailUrl, setThumbnailUrl] = useState("");
 
-  const [progress, setProgress] = useState(0);
+  const [videoProgress, setVideoProgress] = useState(0);
+  const [thumbnailProgress, setThumbnailProgress] = useState(0);
 
   const [loading, setLoading] = useState(false);
 
-  const handleVideoUpload = (res: unknown) => {
-    const uploadRes = res as UploadResponse;
-    setVideoUrl(uploadRes.filePath || uploadRes.url);
+  const handleVideoUpload = (uploadRes: UploadResponse) => {
+    setVideoUrl(uploadRes.filePath || uploadRes.url || "");
   };
 
-  const handleThumbnailUpload = (res: unknown) => {
-    const uploadRes = res as UploadResponse;
-    setThumbnailUrl(uploadRes.filePath || uploadRes.url);
+  const handleThumbnailUpload = (uploadRes: UploadResponse) => {
+    setThumbnailUrl(uploadRes.filePath || uploadRes.url || "");
   };
 
   async function handleSubmit(e: React.FormEvent) {
@@ -53,14 +60,13 @@ export default function VideoUploadForm() {
           description,
           videoUrl,
           thumbnailUrl,
-          controls: true,
         }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error);
+        throw new Error(data.error || data.message || "Failed to upload video");
       }
 
       alert("Video uploaded successfully!");
@@ -69,115 +75,185 @@ export default function VideoUploadForm() {
       router.refresh();
     } catch (error) {
       console.error(error);
-      alert("Failed to upload video.");
+      alert(error instanceof Error ? error.message : "Failed to upload video.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="mx-auto mt-10 max-w-2xl rounded-2xl border border-slate-200 bg-white p-8 shadow-xl">
-      <h1 className="mb-8 text-3xl font-bold text-slate-900">
-        Upload New Video
-      </h1>
+    <div className="min-h-screen bg-slate-50 px-4 py-10">
+      <div className="mx-auto max-w-3xl rounded-3xl border border-slate-200 bg-white p-8 shadow-2xl">
+        {/* Header */}
+        <div className="mb-10 text-center">
+          <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">
+            Upload New Video
+          </h1>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Title */}
-        <div>
-          <label className="mb-2 block text-sm font-semibold text-slate-700">
-            Video Title
-          </label>
-
-          <input
-            type="text"
-            placeholder="Enter video title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
-            required
-          />
+          <p className="mt-3 text-slate-500">
+            Share your content by uploading a video and thumbnail
+          </p>
         </div>
 
-        {/* Description */}
-        <div>
-          <label className="mb-2 block text-sm font-semibold text-slate-700">
-            Description
-          </label>
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Title */}
+          <div>
+            <label className="mb-2 block text-sm font-semibold text-slate-700">
+              Video Title
+            </label>
 
-          <textarea
-            rows={5}
-            placeholder="Describe your video..."
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
-            required
-          />
-        </div>
+            <input
+              type="text"
+              placeholder="Enter video title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="
+              w-full rounded-xl border border-slate-300 
+              bg-slate-50 px-4 py-3 text-slate-900
+              outline-none transition
+              focus:border-violet-500 
+              focus:bg-white
+              focus:ring-4 focus:ring-violet-100
+            "
+              required
+            />
+          </div>
 
-        {/* Upload Video */}
-        <div>
-          <label className="mb-2 block text-sm font-semibold text-slate-700">
-            Upload Video
-          </label>
+          {/* Description */}
+          <div>
+            <label className="mb-2 block text-sm font-semibold text-slate-700">
+              Description
+            </label>
 
-          <FileUpload
-            fileType="video"
-            onSuccess={handleVideoUpload}
-            onProgress={setProgress}
-          />
+            <textarea
+              rows={5}
+              placeholder="Describe your video..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="
+              w-full resize-none rounded-xl border border-slate-300
+              bg-slate-50 px-4 py-3 text-slate-900
+              outline-none transition
+              focus:border-violet-500
+              focus:bg-white
+              focus:ring-4 focus:ring-violet-100
+            "
+              required
+            />
+          </div>
 
-          {progress > 0 && (
-            <div className="mt-4">
-              <div className="h-3 w-full overflow-hidden rounded-full bg-slate-200">
-                <div
-                  className="h-full rounded-full bg-violet-600 transition-all"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
+          {/* Upload Section */}
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Video */}
+            <div
+              className="
+            rounded-2xl border border-dashed 
+            border-violet-300 bg-violet-50/40 p-5
+          "
+            >
+              <label className="mb-3 block text-sm font-bold text-slate-700">
+                Upload Video
+              </label>
 
-              <p className="mt-2 text-sm text-slate-600">
-                {progress}% Uploaded
-              </p>
+              <TypedFileUpload
+                fileType="video"
+                onSuccess={handleVideoUpload}
+                onProgress={setVideoProgress}
+              />
+
+              {videoProgress > 0 && (
+                <div className="mt-5">
+                  <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-200">
+                    <div
+                      className="h-full rounded-full bg-violet-600 transition-all"
+                      style={{
+                        width: `${videoProgress}%`,
+                      }}
+                    />
+                  </div>
+
+                  <p className="mt-2 text-sm text-slate-600">
+                    {videoProgress}% uploaded
+                  </p>
+                </div>
+              )}
+
+              {videoUrl && (
+                <p className="mt-4 text-sm font-semibold text-green-600">
+                  ✓ Video uploaded successfully
+                </p>
+              )}
             </div>
-          )}
 
-          {videoUrl && (
-            <p className="mt-3 text-sm font-medium text-green-600">
-              ✅ Video uploaded successfully
-            </p>
-          )}
-        </div>
+            {/* Thumbnail */}
+            <div
+              className="
+            rounded-2xl border border-dashed 
+            border-violet-300 bg-violet-50/40 p-5
+          "
+            >
+              <label className="mb-3 block text-sm font-bold text-slate-700">
+                Upload Thumbnail
+              </label>
 
-        {/* Upload Thumbnail */}
-        <div>
-          <label className="mb-2 block text-sm font-semibold text-slate-700">
-            Upload Thumbnail
-          </label>
+              <TypedFileUpload
+                fileType="image"
+                onSuccess={handleThumbnailUpload}
+                onProgress={setThumbnailProgress}
+              />
 
-          <FileUpload fileType="image" onSuccess={handleThumbnailUpload} />
+              {thumbnailProgress > 0 && (
+                <div className="mt-5">
+                  <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-200">
+                    <div
+                      className="h-full rounded-full bg-violet-600 transition-all"
+                      style={{
+                        width: `${thumbnailProgress}%`,
+                      }}
+                    />
+                  </div>
 
-          {thumbnailUrl && (
-            <p className="mt-3 text-sm font-medium text-green-600">
-              ✅ Thumbnail uploaded successfully
-            </p>
-          )}
-        </div>
+                  <p className="mt-2 text-sm text-slate-600">
+                    {thumbnailProgress}% uploaded
+                  </p>
+                </div>
+              )}
 
-        {/* Submit */}
-        <button
-          type="submit"
-          disabled={
-            loading ||
-            !title.trim() ||
-            !description.trim() ||
-            !videoUrl ||
-            !thumbnailUrl
-          }
-          className="w-full rounded-xl bg-violet-600 py-3 text-lg font-semibold text-white transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:bg-slate-400"
-        >
-          {loading ? "Uploading..." : "Upload Video"}
-        </button>
-      </form>
+              {thumbnailUrl && (
+                <p className="mt-4 text-sm font-semibold text-green-600">
+                  ✓ Thumbnail uploaded successfully
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={
+              loading ||
+              !title.trim() ||
+              !description.trim() ||
+              !videoUrl ||
+              !thumbnailUrl
+            }
+            className="
+            w-full rounded-xl 
+            bg-linear-to-r from-violet-600 to-indigo-600
+            py-3.5 text-lg font-bold text-white
+            shadow-lg shadow-violet-200
+            transition-all duration-300
+            hover:scale-[1.01]
+            hover:shadow-xl
+            disabled:cursor-not-allowed
+            disabled:bg-slate-400
+            disabled:shadow-none
+          "
+          >
+            {loading ? "Uploading..." : "Upload Video"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
