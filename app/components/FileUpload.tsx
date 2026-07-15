@@ -69,13 +69,19 @@ export default function FileUpload({
 
       const auth = await authResponse.json();
 
+      console.log("ImageKit Auth:", auth);
+
       const response = await upload({
         file,
         fileName: file.name,
-        publicKey: process.env.NEXT_PUBLIC_PUBLIC_KEY!,
+
+        // Use backend returned public key
+        publicKey: auth.publicKey,
+
+        // Authentication params
+        token: auth.token,
         signature: auth.signature,
         expire: auth.expire,
-        token: auth.token,
 
         onProgress: (event) => {
           if (event.lengthComputable && onProgress) {
@@ -86,13 +92,15 @@ export default function FileUpload({
         },
       });
 
+      console.log("Upload Response:", response);
+
       onSuccess(response);
 
       if (inputRef.current) {
         inputRef.current.value = "";
       }
     } catch (err) {
-      console.error(err);
+      console.error("Upload error:", err);
 
       if (err instanceof ImageKitAbortError) {
         setError("Upload cancelled.");
