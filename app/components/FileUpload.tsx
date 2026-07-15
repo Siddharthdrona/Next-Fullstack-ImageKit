@@ -1,7 +1,7 @@
 "use client";
 
 import { upload } from "@imagekit/next";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 interface ImageKitAuth {
   token: string;
@@ -10,9 +10,29 @@ interface ImageKitAuth {
   publicKey: string;
 }
 
-export default function FileUpload() {
+interface UploadResponse {
+  url?: string;
+  filePath?: string;
+}
+
+interface FileUploadProps {
+  fileType: "video" | "image";
+  onSuccess: (res: UploadResponse) => void;
+  onProgress?: (progress: number) => void;
+}
+
+export default function FileUpload({
+  fileType,
+  onSuccess,
+  onProgress,
+}: FileUploadProps) {
   const [progress, setProgress] = useState<number>(0);
   const [uploading, setUploading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const accept = fileType === "video" ? "video/*" : "image/*";
 
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -22,6 +42,11 @@ export default function FileUpload() {
     if (!file) {
       return;
     }
+
+    setError(null);
+    setFileName(file.name);
+    setProgress(0);
+    onProgress?.(0);
 
     try {
       setUploading(true);
@@ -35,46 +60,60 @@ export default function FileUpload() {
 
       const auth: ImageKitAuth = await authResponse.json();
 
-      console.log("ImageKit Auth:", auth);
-
       // Upload file to ImageKit
       const response = await upload({
         file,
-
         fileName: file.name,
-
-        // Required public key
         publicKey: auth.publicKey,
-
-        // Authentication
         token: auth.token,
-
         signature: auth.signature,
-
         expire: auth.expire,
-
         onProgress: (event) => {
           if (event.lengthComputable) {
             const percentage = Math.round((event.loaded / event.total) * 100);
-
             setProgress(percentage);
+            onProgress?.(percentage);
           }
         },
       });
 
-      console.log("Upload Successful:", response);
-    } catch (error) {
-      console.error("Upload Error:", error);
+      onProgress?.(100);
+      onSuccess({
+        url: response.url ?? undefined,
+        filePath: response.filePath ?? undefined,
+      });
+    } catch (err) {
+      console.error("Upload Error:", err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to upload file. Try again.",
+      );
+      setFileName(null);
+      onProgress?.(0);
     } finally {
       setUploading(false);
     }
   };
 
   return (
-    <div className="space-y-4">
-      <input type="file" onChange={handleFileChange} />
+    <div>
+      <input
+        ref={inputRef}
+        type="file"
+        accept={accept}
+        onChange={handleFileChange}
+        disabled={uploading}
+        className="block w-full cursor-pointer text-sm text-gray-600 file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-white file:px-3.5 file:py-2 file:text-sm file:font-semibold file:text-gray-700 file:shadow-sm file:ring-1 file:ring-gray-300 hover:file:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+      />
 
-      {uploading && <p>Uploading {progress}%</p>}
+      {fileName && !error && (
+        <p className="mt-2 truncate text-xs text-gray-500">{fileName}</p>
+      )}
+
+      {error && (
+        <p className="mt-2 text-xs font-medium text-red-600">{error}</p>
+      )}
     </div>
   );
 }

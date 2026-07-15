@@ -50,7 +50,7 @@ export default function VideoUploadForm() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/video", {
+      const res = await fetch("/api/videos", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
