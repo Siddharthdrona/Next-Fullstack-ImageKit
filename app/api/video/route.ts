@@ -27,18 +27,20 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
+
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     await connectToDatabase();
 
-    const body: IVideo = await request.json();
+    const body = await request.json();
+
     if (
-      !body.title ||
-      !body.description ||
-      !body.videoUrl ||
-      !body.thumbnailUrl
+      !body.title?.trim() ||
+      !body.description?.trim() ||
+      !body.videoUrl?.trim() ||
+      !body.thumbnailUrl?.trim()
     ) {
       return NextResponse.json(
         { error: "Missing required fields" },
@@ -46,23 +48,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const videoData = {
-      ...body,
-      controls: body?.controls ?? true,
-      transformation: {
-        height: 1920,
-        width: 1080,
-        quality: body.transformation?.quality ?? 100,
-      },
-    };
-    
-    const newVideo = await Video.create(videoData);
+    const video = await Video.create({
+      title: body.title,
+      description: body.description,
+      videoUrl: body.videoUrl,
+      thumbnailUrl: body.thumbnailUrl,
+      controls: body.controls ?? true,
 
-    return NextResponse.json(newVideo);
+      uploader: session.user.id,
+
+      transformation: {
+        width: 1080,
+        height: 1920,
+        quality: body.transformation?.quality ?? 80,
+      },
+    });
+
+    return NextResponse.json(video, {
+      status: 201,
+    });
   } catch (error) {
+    console.error(error);
+
     return NextResponse.json(
-      { error: "Failed to create video" },
-      { status: 500 },
+      {
+        error: "Failed to create video",
+      },
+      {
+        status: 500,
+      },
     );
   }
 }

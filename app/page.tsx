@@ -1,42 +1,71 @@
 import Link from "next/link";
+import { getServerSession } from "next-auth";
 
-export default function Home() {
+import { authOptions } from "../lib/auth";
+import { connectToDatabase } from "../lib/db";
+import Video from "../models/Video";
+
+import Header from "./components/Header";
+import VideoFeed from "./components/VideoFeed";
+
+export default async function Home() {
+  await connectToDatabase();
+
+  const session = await getServerSession(authOptions);
+
+  const videos = await Video.find({}).sort({ createdAt: -1 }).lean();
+
   return (
-    <main className="min-h-screen bg-zinc-950 text-white flex items-center justify-center px-6">
-      <div className="max-w-3xl text-center">
-        <span className="inline-block rounded-full border border-zinc-700 bg-zinc-900 px-4 py-1 text-sm text-zinc-300">
-          🚀 Full Stack Project
-        </span>
+    <>
+      <Header />
 
-        <h1 className="mt-6 text-5xl font-bold tracking-tight sm:text-6xl">
-          ImageKit & Next.js
-          <br />
-          Fullstack Application
-        </h1>
+      <main className="min-h-screen bg-slate-50">
+        {/* Hero */}
+        <section className="bg-linear-to-r from-violet-700 to-indigo-700 py-20 text-white">
+          <div className="mx-auto max-w-6xl px-6 text-center">
+            <h1 className="text-5xl font-bold">AI Powered Video Platform</h1>
 
-        <p className="mt-6 text-lg text-zinc-400 leading-8">
-          Build, upload, optimize, and manage images seamlessly with
-          <span className="font-semibold text-white"> ImageKit</span>,
-          <span className="font-semibold text-white"> Next.js</span>,
-          authentication, and a modern full-stack architecture.
-        </p>
+            <p className="mt-6 text-lg text-violet-100">
+              Upload, manage and stream videos securely with Next.js, ImageKit
+              and MongoDB.
+            </p>
 
-        <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <Link
-            href="/login"
-            className="rounded-lg bg-white px-6 py-3 font-semibold text-black transition hover:bg-zinc-200"
-          >
-            Get Started
-          </Link>
+            <div className="mt-8 flex justify-center gap-4">
+              {session ? (
+                <Link
+                  href="/upload"
+                  className="rounded-lg bg-white px-6 py-3 font-semibold text-violet-700"
+                >
+                  Upload Video
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className="rounded-lg bg-white px-6 py-3 font-semibold text-violet-700"
+                  >
+                    Login
+                  </Link>
 
-          <Link
-            href="/register"
-            className="rounded-lg border border-zinc-700 px-6 py-3 font-semibold text-white transition hover:bg-zinc-900"
-          >
-            Create Account
-          </Link>
-        </div>
-      </div>
-    </main>
+                  <Link
+                    href="/register"
+                    className="rounded-lg border border-white px-6 py-3"
+                  >
+                    Register
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* Videos */}
+        <section className="mx-auto max-w-7xl px-6 py-12">
+          <h2 className="mb-8 text-3xl font-bold">Latest Videos</h2>
+
+          <VideoFeed videos={JSON.parse(JSON.stringify(videos))} />
+        </section>
+      </main>
+    </>
   );
 }

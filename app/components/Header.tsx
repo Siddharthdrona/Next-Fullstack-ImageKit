@@ -1,79 +1,99 @@
 "use client";
 
 import Link from "next/link";
-import { useSession, signOut } from "next-auth/react";
-import { Home, User } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
+import { Home, Upload, LayoutDashboard, User } from "lucide-react";
 import { useNotification } from "./Notification";
 
 export default function Header() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const { showNotification } = useNotification();
 
   const handleSignOut = async () => {
     try {
-      await signOut();
-      showNotification("Signed out successfully", "success");
+      await signOut({
+        callbackUrl: "/login",
+      });
+
+      showNotification("Signed out successfully.", "success");
     } catch {
-      showNotification("Failed to sign out", "error");
+      showNotification("Failed to sign out.", "error");
     }
   };
 
   return (
-    <div className="navbar bg-base-300 sticky top-0 z-40">
-      <div className="container mx-auto">
-        <div className="flex-1 px-2 lg:flex-none">
+    <header className="sticky top-0 z-50 border-b bg-base-100 shadow-sm">
+      <div className="navbar container mx-auto px-4">
+        {/* Logo */}
+        <div className="flex-1">
           <Link
             href="/"
-            className="btn btn-ghost text-xl gap-2 normal-case font-bold"
-            prefetch={true}
-            onClick={() =>
-              showNotification("Welcome to ImageKit ReelsPro", "info")
-            }
+            className="btn btn-ghost text-xl font-bold gap-2"
+            onClick={() => showNotification("Welcome to Video with AI", "info")}
           >
-            <Home className="w-5 h-5" />
+            <Home size={20} />
             Video with AI
           </Link>
         </div>
-        <div className="flex flex-1 justify-end px-2">
-          <div className="flex items-stretch gap-2">
+
+        {/* Navigation */}
+        <div className="hidden md:flex gap-2">
+          <Link href="/" className="btn btn-ghost">
+            Home
+          </Link>
+
+          {session && (
+            <>
+              <Link href="/dashboard" className="btn btn-ghost">
+                <LayoutDashboard size={18} />
+                Dashboard
+              </Link>
+
+              <Link href="/upload" className="btn btn-primary">
+                <Upload size={18} />
+                Upload
+              </Link>
+            </>
+          )}
+        </div>
+
+        {/* User */}
+        <div className="flex-none">
+          {status === "loading" ? (
+            <span className="loading loading-spinner loading-md"></span>
+          ) : (
             <div className="dropdown dropdown-end">
-              <div
-                tabIndex={0}
-                role="button"
-                className="btn btn-ghost btn-circle"
-              >
-                <User className="w-5 h-5" />
-              </div>
-              <ul
-                tabIndex={0}
-                className="dropdown-content z-1 shadow-lg bg-base-100 rounded-box w-64 mt-4 py-2"
-              >
+              <button className="btn btn-circle btn-ghost">
+                <User size={20} />
+              </button>
+
+              <ul className="menu dropdown-content mt-3 w-72 rounded-box bg-base-100 shadow-lg border p-2">
                 {session ? (
                   <>
-                    <li className="px-4 py-1">
-                      <span className="text-sm opacity-70">
-                        {session.user?.email?.split("@")[0]}
+                    <li className="pointer-events-none">
+                      <span className="font-semibold">
+                        {session.user?.email}
                       </span>
                     </li>
-                    <div className="divider my-1"></div>
 
                     <li>
-                      <Link
-                        href="/upload"
-                        className="px-4 py-2 hover:bg-base-200 block w-full"
-                        onClick={() =>
-                          showNotification("Welcome to Admin Dashboard", "info")
-                        }
-                      >
-                        Video Upload
+                      <Link href="/dashboard">
+                        <LayoutDashboard size={18} />
+                        Dashboard
                       </Link>
                     </li>
 
                     <li>
-                      <button
-                        onClick={handleSignOut}
-                        className="px-4 py-2 text-error hover:bg-base-200 w-full text-left"
-                      >
+                      <Link href="/upload">
+                        <Upload size={18} />
+                        Upload Video
+                      </Link>
+                    </li>
+
+                    <div className="divider my-1"></div>
+
+                    <li>
+                      <button onClick={handleSignOut} className="text-error">
                         Sign Out
                       </button>
                     </li>
@@ -82,9 +102,8 @@ export default function Header() {
                   <li>
                     <Link
                       href="/login"
-                      className="px-4 py-2 hover:bg-base-200 block w-full"
                       onClick={() =>
-                        showNotification("Please sign in to continue", "info")
+                        showNotification("Please sign in to continue.", "info")
                       }
                     >
                       Login
@@ -93,9 +112,9 @@ export default function Header() {
                 )}
               </ul>
             </div>
-          </div>
+          )}
         </div>
       </div>
-    </div>
+    </header>
   );
 }

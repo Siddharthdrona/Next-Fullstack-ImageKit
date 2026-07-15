@@ -1,11 +1,17 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useRef, ReactNode } from "react";
 
 type NotificationType = "success" | "error" | "warning" | "info";
 
 interface NotificationContextType {
-  showNotification: (message: string, type: NotificationType) => void;
+  showNotification: (message: string, type?: NotificationType) => void;
+}
+
+interface NotificationState {
+  id: number;
+  message: string;
+  type: NotificationType;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(
@@ -13,27 +19,60 @@ const NotificationContext = createContext<NotificationContextType | undefined>(
 );
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
-  const [notification, setNotification] = useState<{
-    message: string;
-    type: NotificationType;
-    id: number;
-  } | null>(null);
+  const [notification, setNotification] = useState<NotificationState | null>(
+    null,
+  );
 
-  const showNotification = (message: string, type: NotificationType) => {
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const showNotification = (
+    message: string,
+    type: NotificationType = "info",
+  ) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
     const id = Date.now();
-    setNotification({ message, type, id });
-    setTimeout(() => {
+
+    setNotification({
+      id,
+      message,
+      type,
+    });
+
+    timeoutRef.current = setTimeout(() => {
       setNotification((current) => (current?.id === id ? null : current));
     }, 3000);
+  };
+
+  const closeNotification = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    setNotification(null);
   };
 
   return (
     <NotificationContext.Provider value={{ showNotification }}>
       {children}
+
       {notification && (
-        <div className="toast toast-bottom toast-end z-100">
-          <div className={`alert ${getAlertClass(notification.type)}`}>
+        <div className="toast toast-top toast-end z-9999">
+          <div
+            className={`alert ${getAlertClass(
+              notification.type,
+            )} shadow-lg flex items-center justify-between min-w-[320px]`}
+          >
             <span>{notification.message}</span>
+
+            <button
+              onClick={closeNotification}
+              className="ml-4 text-lg font-bold hover:opacity-70"
+            >
+              ✕
+            </button>
           </div>
         </div>
       )}
@@ -41,16 +80,18 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   );
 }
 
-function getAlertClass(type: NotificationType): string {
+function getAlertClass(type: NotificationType) {
   switch (type) {
     case "success":
       return "alert-success";
+
     case "error":
       return "alert-error";
+
     case "warning":
       return "alert-warning";
+
     case "info":
-      return "alert-info";
     default:
       return "alert-info";
   }
@@ -58,10 +99,12 @@ function getAlertClass(type: NotificationType): string {
 
 export function useNotification() {
   const context = useContext(NotificationContext);
-  if (context === undefined) {
+
+  if (!context) {
     throw new Error(
-      "useNotification must be used within a NotificationProvider",
+      "useNotification must be used inside NotificationProvider.",
     );
   }
+
   return context;
 }
