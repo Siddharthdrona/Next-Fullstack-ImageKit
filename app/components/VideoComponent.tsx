@@ -20,8 +20,19 @@ export default function VideoComponent({ video }: Props) {
         >
           {video.videoUrl ? (
             <>
-              <Video
+              {/* <Video
                 path={video.videoUrl}
+                transformation={[
+                  {
+                    width: "720",
+                    height: "1280",
+                  },
+                ]}
+                controls={video.controls}
+                className="h-full w-full object-cover"
+              /> */}
+              <Video
+                src={video.videoUrl}
                 transformation={[
                   {
                     width: "720",
@@ -61,7 +72,7 @@ export default function VideoComponent({ video }: Props) {
           <div className="flex items-center gap-1">
             <Calendar size={14} />
             {video.createdAt
-              ? new Date(video.createdAt).toLocaleDateString()
+              ? new Date(video.createdAt).toLocaleDateString("en-GB")
               : "Today"}
           </div>
 
