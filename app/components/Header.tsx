@@ -13,7 +13,11 @@ import {
   Video,
 } from "lucide-react";
 
-export default function Header() {
+interface HeaderProps {
+  showThemeToggle?: boolean;
+}
+
+export default function Header({ showThemeToggle = true }: HeaderProps) {
   const pathname = usePathname();
   const { data: session } = useSession();
 
@@ -80,7 +84,7 @@ export default function Header() {
 
         {/* Right */}
         <div className="flex items-center gap-3">
-          <ThemeToggle />
+          {showThemeToggle && <ThemeToggle />}
 
           {session ? (
             <>

@@ -14,7 +14,7 @@ export default async function UploadPage() {
 
   return (
     <>
-      <Header />
+      <Header showThemeToggle={false} />
 
       <main className="min-h-screen bg-slate-50 py-10">
         <div className="mx-auto max-w-3xl px-6">

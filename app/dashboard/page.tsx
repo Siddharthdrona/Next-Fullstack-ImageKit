@@ -55,7 +55,7 @@ export default function Dashboard() {
 
   return (
     <>
-      <Header />
+      <Header showThemeToggle={false} />
 
       <main className="min-h-screen bg-slate-50">
         {/* Top Section */}

@@ -17,15 +17,17 @@ export default async function Home() {
 
   return (
     <>
-      <Header />
+      <Header showThemeToggle />
 
-      <main className="min-h-screen bg-slate-50">
+      <main className="min-h-screen bg-background transition-colors duration-300">
         {/* Hero */}
-        <section className="bg-linear-to-r from-violet-700 to-indigo-700 py-20 text-white">
+        <section className="bg-linear-to-br from-violet-700 via-violet-600 to-indigo-700 py-20 text-white transition-colors duration-300 dark:from-slate-950 dark:via-violet-950 dark:to-slate-900">
           <div className="mx-auto max-w-6xl px-6 text-center">
-            <h1 className="text-5xl font-bold">AI Powered Video Platform</h1>
+            <h1 className="text-5xl font-bold tracking-tight">
+              AI Powered Video Platform
+            </h1>
 
-            <p className="mt-6 text-lg text-violet-100">
+            <p className="mt-6 text-lg text-violet-100 dark:text-slate-300">
               Upload, manage and stream videos securely with Next.js, ImageKit
               and MongoDB.
             </p>
@@ -34,7 +36,7 @@ export default async function Home() {
               {session ? (
                 <Link
                   href="/upload"
-                  className="rounded-lg bg-white px-6 py-3 font-semibold text-violet-700"
+                  className="rounded-xl bg-surface px-6 py-3 font-semibold text-foreground shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
                 >
                   Upload Video
                 </Link>
@@ -42,14 +44,14 @@ export default async function Home() {
                 <>
                   <Link
                     href="/login"
-                    className="rounded-lg bg-white px-6 py-3 font-semibold text-violet-700"
+                    className="rounded-xl bg-surface px-6 py-3 font-semibold text-foreground shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
                   >
                     Login
                   </Link>
 
                   <Link
                     href="/register"
-                    className="rounded-lg border border-white px-6 py-3"
+                    className="rounded-xl border border-white/30 bg-white/10 px-6 py-3 font-semibold text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/20"
                   >
                     Register
                   </Link>
@@ -61,7 +63,9 @@ export default async function Home() {
 
         {/* Videos */}
         <section className="mx-auto max-w-7xl px-6 py-12">
-          <h2 className="mb-8 text-3xl font-bold">Latest Videos</h2>
+          <h2 className="mb-8 text-3xl font-bold text-foreground">
+            Latest Videos
+          </h2>
 
           <VideoFeed videos={JSON.parse(JSON.stringify(videos))} />
         </section>
