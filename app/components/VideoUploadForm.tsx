@@ -82,176 +82,294 @@ export default function VideoUploadForm() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-10">
-      <div className="mx-auto max-w-3xl rounded-3xl border border-slate-200 bg-white p-8 shadow-2xl">
+    <div className="min-h-screen bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-2xl">
         {/* Header */}
-        <div className="mb-10 text-center">
-          <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">
-            Upload New Video
-          </h1>
+        <div className="mb-8">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 transition hover:text-gray-900"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path
+                d="M15 18l-6-6 6-6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            Back
+          </button>
 
-          <p className="mt-3 text-slate-500">
-            Share your content by uploading a video and thumbnail
+          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
+            Upload a video
+          </h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Add a title, description, video file, and thumbnail.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Title */}
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-slate-700">
-              Video Title
-            </label>
-
-            <input
-              type="text"
-              placeholder="Enter video title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="
-              w-full rounded-xl border border-slate-300 
-              bg-slate-50 px-4 py-3 text-slate-900
-              outline-none transition
-              focus:border-violet-500 
-              focus:bg-white
-              focus:ring-4 focus:ring-violet-100
-            "
-              required
-            />
-          </div>
-
-          {/* Description */}
-          <div>
-            <label className="mb-2 block text-sm font-semibold text-slate-700">
-              Description
-            </label>
-
-            <textarea
-              rows={5}
-              placeholder="Describe your video..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="
-              w-full resize-none rounded-xl border border-slate-300
-              bg-slate-50 px-4 py-3 text-slate-900
-              outline-none transition
-              focus:border-violet-500
-              focus:bg-white
-              focus:ring-4 focus:ring-violet-100
-            "
-              required
-            />
-          </div>
-
-          {/* Upload Section */}
-          <div className="grid gap-6 md:grid-cols-2">
-            {/* Video */}
-            <div
-              className="
-            rounded-2xl border border-dashed 
-            border-violet-300 bg-violet-50/40 p-5
-          "
-            >
-              <label className="mb-3 block text-sm font-bold text-slate-700">
-                Upload Video
+        {/* Card */}
+        <form
+          onSubmit={handleSubmit}
+          className="rounded-2xl border border-gray-200 bg-white shadow-sm"
+        >
+          <div className="space-y-6 p-6 sm:p-8">
+            {/* Title */}
+            <div>
+              <label
+                htmlFor="video-title"
+                className="mb-1.5 block text-sm font-medium text-gray-900"
+              >
+                Title
               </label>
-
-              <TypedFileUpload
-                fileType="video"
-                onSuccess={handleVideoUpload}
-                onProgress={setVideoProgress}
+              <input
+                id="video-title"
+                type="text"
+                placeholder="e.g. How to build a Next.js app"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                maxLength={100}
+                className="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                required
               />
-
-              {videoProgress > 0 && (
-                <div className="mt-5">
-                  <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-200">
-                    <div
-                      className="h-full rounded-full bg-violet-600 transition-all"
-                      style={{
-                        width: `${videoProgress}%`,
-                      }}
-                    />
-                  </div>
-
-                  <p className="mt-2 text-sm text-slate-600">
-                    {videoProgress}% uploaded
-                  </p>
-                </div>
-              )}
-
-              {videoUrl && (
-                <p className="mt-4 text-sm font-semibold text-green-600">
-                  ✓ Video uploaded successfully
-                </p>
-              )}
+              <p className="mt-1 text-right text-xs text-gray-400">
+                {title.length}/100
+              </p>
             </div>
 
-            {/* Thumbnail */}
-            <div
-              className="
-            rounded-2xl border border-dashed 
-            border-violet-300 bg-violet-50/40 p-5
-          "
-            >
-              <label className="mb-3 block text-sm font-bold text-slate-700">
-                Upload Thumbnail
+            {/* Description */}
+            <div>
+              <label
+                htmlFor="video-description"
+                className="mb-1.5 block text-sm font-medium text-gray-900"
+              >
+                Description
               </label>
-
-              <TypedFileUpload
-                fileType="image"
-                onSuccess={handleThumbnailUpload}
-                onProgress={setThumbnailProgress}
+              <textarea
+                id="video-description"
+                rows={4}
+                placeholder="What's this video about?"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                maxLength={1000}
+                className="w-full resize-none rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                required
               />
+              <p className="mt-1 text-right text-xs text-gray-400">
+                {description.length}/1000
+              </p>
+            </div>
 
-              {thumbnailProgress > 0 && (
-                <div className="mt-5">
-                  <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-200">
-                    <div
-                      className="h-full rounded-full bg-violet-600 transition-all"
-                      style={{
-                        width: `${thumbnailProgress}%`,
-                      }}
+            {/* Uploads */}
+            <div className="space-y-5">
+              {/* Video upload */}
+              <div>
+                <span className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-indigo-600">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                  >
+                    <path
+                      d="M23 7l-7 5 7 5V7z"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     />
-                  </div>
+                    <rect
+                      x="1"
+                      y="5"
+                      width="15"
+                      height="14"
+                      rx="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  Video file
+                </span>
 
-                  <p className="mt-2 text-sm text-slate-600">
-                    {thumbnailProgress}% uploaded
-                  </p>
+                <div
+                  className={`rounded-xl border-2 border-dashed p-4 transition ${
+                    videoUrl
+                      ? "border-green-300 bg-green-50/50"
+                      : "border-gray-300 bg-gray-50 hover:border-indigo-300 hover:bg-indigo-50/40"
+                  }`}
+                >
+                  <TypedFileUpload
+                    fileType="video"
+                    onSuccess={handleVideoUpload}
+                    onProgress={setVideoProgress}
+                  />
+
+                  {videoProgress > 0 && videoProgress < 100 && !videoUrl && (
+                    <div className="mt-3">
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-200">
+                        <div
+                          className="h-full rounded-full bg-indigo-600 transition-all duration-300"
+                          style={{ width: `${videoProgress}%` }}
+                        />
+                      </div>
+                      <p className="mt-1.5 text-xs text-gray-500">
+                        Uploading… {videoProgress}%
+                      </p>
+                    </div>
+                  )}
+
+                  {videoUrl && (
+                    <div className="mt-3 flex items-center gap-1.5 text-sm font-medium text-green-700">
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        className="shrink-0"
+                      >
+                        <path
+                          d="M20 6L9 17l-5-5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      Video uploaded
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
 
-              {thumbnailUrl && (
-                <p className="mt-4 text-sm font-semibold text-green-600">
-                  ✓ Thumbnail uploaded successfully
-                </p>
-              )}
+              {/* Thumbnail upload */}
+              <div>
+                <span className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-fuchsia-600">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                  >
+                    <rect
+                      x="3"
+                      y="3"
+                      width="18"
+                      height="18"
+                      rx="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <path
+                      d="M21 15l-5-5L5 21"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  Thumbnail
+                </span>
+
+                <div
+                  className={`rounded-xl border-2 border-dashed p-4 transition ${
+                    thumbnailUrl
+                      ? "border-green-300 bg-green-50/50"
+                      : "border-gray-300 bg-gray-50 hover:border-fuchsia-300 hover:bg-fuchsia-50/40"
+                  }`}
+                >
+                  <TypedFileUpload
+                    fileType="image"
+                    onSuccess={handleThumbnailUpload}
+                    onProgress={setThumbnailProgress}
+                  />
+
+                  {thumbnailProgress > 0 &&
+                    thumbnailProgress < 100 &&
+                    !thumbnailUrl && (
+                      <div className="mt-3">
+                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-200">
+                          <div
+                            className="h-full rounded-full bg-fuchsia-600 transition-all duration-300"
+                            style={{ width: `${thumbnailProgress}%` }}
+                          />
+                        </div>
+                        <p className="mt-1.5 text-xs text-gray-500">
+                          Uploading… {thumbnailProgress}%
+                        </p>
+                      </div>
+                    )}
+
+                  {thumbnailUrl && (
+                    <div className="mt-3 flex items-center gap-1.5 text-sm font-medium text-green-700">
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        className="shrink-0"
+                      >
+                        <path
+                          d="M20 6L9 17l-5-5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                      Thumbnail uploaded
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={
-              loading ||
-              !title.trim() ||
-              !description.trim() ||
-              !videoUrl ||
-              !thumbnailUrl
-            }
-            className="
-            w-full rounded-xl 
-            bg-linear-to-r from-violet-600 to-indigo-600
-            py-3.5 text-lg font-bold text-white
-            shadow-lg shadow-violet-200
-            transition-all duration-300
-            hover:scale-[1.01]
-            hover:shadow-xl
-            disabled:cursor-not-allowed
-            disabled:bg-slate-400
-            disabled:shadow-none
-          "
-          >
-            {loading ? "Uploading..." : "Upload Video"}
-          </button>
+          {/* Footer / submit */}
+          <div className="flex items-center justify-end gap-3 rounded-b-2xl border-t border-gray-100 bg-gray-50/60 px-6 py-4 sm:px-8">
+            <button
+              type="submit"
+              disabled={
+                loading ||
+                !title.trim() ||
+                !description.trim() ||
+                !videoUrl ||
+                !thumbnailUrl
+              }
+              className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500"
+            >
+              {loading && (
+                <svg
+                  className="h-4 w-4 animate-spin"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                  />
+                </svg>
+              )}
+              {loading ? "Uploading…" : "Upload video"}
+            </button>
+          </div>
         </form>
       </div>
     </div>
