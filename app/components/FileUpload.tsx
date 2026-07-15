@@ -1,118 +1,70 @@
 "use client";
 
-import {
-  ImageKitAbortError,
-  ImageKitInvalidRequestError,
-  ImageKitServerError,
-  ImageKitUploadNetworkError,
-  upload,
-} from "@imagekit/next";
-import { useRef, useState } from "react";
+import { upload } from "@imagekit/next";
+import { useState } from "react";
 
-interface FileUploadProps {
-  onSuccess: (res: unknown) => void;
-  onProgress?: (progress: number) => void;
-  fileType?: "image" | "video";
-  maxSizeMB?: number;
+interface ImageKitAuth {
+  token: string;
+  expire: number;
+  signature: string;
+  publicKey: string;
 }
 
-export default function FileUpload({
-  onSuccess,
-  onProgress,
-  fileType = "image",
-  maxSizeMB = 100,
-}: FileUploadProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
+export default function FileUpload() {
+  const [progress, setProgress] = useState<number>(0);
+  const [uploading, setUploading] = useState<boolean>(false);
 
-  const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState("");
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
 
-  const validateFile = (file: File) => {
-    setError("");
-
-    if (fileType === "video" && !file.type.startsWith("video/")) {
-      setError("Please upload a valid video file.");
-      return false;
-    }
-
-    if (fileType === "image" && !file.type.startsWith("image/")) {
-      setError("Please upload a valid image file.");
-      return false;
-    }
-
-    if (file.size > maxSizeMB * 1024 * 1024) {
-      setError(`File size must be less than ${maxSizeMB} MB.`);
-      return false;
-    }
-
-    return true;
-  };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-
-    if (!file) return;
-
-    if (!validateFile(file)) {
+    if (!file) {
       return;
     }
 
-    setUploading(true);
-    setError("");
-
     try {
+      setUploading(true);
+
+      // Fetch ImageKit authentication parameters
       const authResponse = await fetch("/api/auth/imagekit-auth");
 
       if (!authResponse.ok) {
-        throw new Error("Failed to fetch ImageKit authentication.");
+        throw new Error("Failed to get ImageKit authentication");
       }
 
-      const auth = await authResponse.json();
+      const auth: ImageKitAuth = await authResponse.json();
 
       console.log("ImageKit Auth:", auth);
 
+      // Upload file to ImageKit
       const response = await upload({
         file,
+
         fileName: file.name,
 
-        // Use backend returned public key
+        // Required public key
         publicKey: auth.publicKey,
 
-        // Authentication params
+        // Authentication
         token: auth.token,
+
         signature: auth.signature,
+
         expire: auth.expire,
 
         onProgress: (event) => {
-          if (event.lengthComputable && onProgress) {
-            const progress = Math.round((event.loaded / event.total) * 100);
+          if (event.lengthComputable) {
+            const percentage = Math.round((event.loaded / event.total) * 100);
 
-            onProgress(progress);
+            setProgress(percentage);
           }
         },
       });
 
-      console.log("Upload Response:", response);
-
-      onSuccess(response);
-
-      if (inputRef.current) {
-        inputRef.current.value = "";
-      }
-    } catch (err) {
-      console.error("Upload error:", err);
-
-      if (err instanceof ImageKitAbortError) {
-        setError("Upload cancelled.");
-      } else if (err instanceof ImageKitInvalidRequestError) {
-        setError("Invalid upload request.");
-      } else if (err instanceof ImageKitUploadNetworkError) {
-        setError("Network error. Please check your connection.");
-      } else if (err instanceof ImageKitServerError) {
-        setError("ImageKit server error.");
-      } else {
-        setError("Upload failed. Please try again.");
-      }
+      console.log("Upload Successful:", response);
+    } catch (error) {
+      console.error("Upload Error:", error);
     } finally {
       setUploading(false);
     }
@@ -120,26 +72,9 @@ export default function FileUpload({
 
   return (
     <div className="space-y-4">
-      <input
-        ref={inputRef}
-        type="file"
-        accept={fileType === "video" ? "video/*" : "image/*"}
-        onChange={handleFileChange}
-        disabled={uploading}
-        className="block w-full rounded-lg border border-slate-300 p-2 file:mr-4 file:rounded-lg file:border-0 file:bg-violet-600 file:px-4 file:py-2 file:text-white hover:file:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-50"
-      />
+      <input type="file" onChange={handleFileChange} />
 
-      {uploading && (
-        <div className="rounded-lg bg-violet-100 p-3 text-sm text-violet-700">
-          Uploading...
-        </div>
-      )}
-
-      {error && (
-        <div className="rounded-lg bg-red-100 p-3 text-sm text-red-600">
-          {error}
-        </div>
-      )}
+      {uploading && <p>Uploading {progress}%</p>}
     </div>
   );
 }
