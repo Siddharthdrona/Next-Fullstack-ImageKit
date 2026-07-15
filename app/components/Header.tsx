@@ -1,117 +1,114 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
-import { Home, Upload, LayoutDashboard, User } from "lucide-react";
-import { useNotification } from "./Notification";
+import {
+  Home,
+  Upload,
+  LayoutDashboard,
+  LogOut,
+  UserCircle2,
+  Video,
+} from "lucide-react";
 
 export default function Header() {
-  const { data: session, status } = useSession();
-  const { showNotification } = useNotification();
+  const pathname = usePathname();
+  const { data: session } = useSession();
 
-  const handleSignOut = async () => {
-    try {
-      await signOut({
-        callbackUrl: "/login",
-      });
-
-      showNotification("Signed out successfully.", "success");
-    } catch {
-      showNotification("Failed to sign out.", "error");
-    }
-  };
+  const navItems = [
+    {
+      name: "Home",
+      href: "/",
+      icon: Home,
+    },
+    {
+      name: "Upload",
+      href: "/upload",
+      icon: Upload,
+    },
+    {
+      name: "Dashboard",
+      href: "/dashboard",
+      icon: LayoutDashboard,
+    },
+  ];
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-base-100 shadow-sm">
-      <div className="navbar container mx-auto px-4">
+    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-md shadow-sm">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         {/* Logo */}
-        <div className="flex-1">
-          <Link
-            href="/"
-            className="btn btn-ghost text-xl font-bold gap-2"
-            onClick={() => showNotification("Welcome to Video with AI", "info")}
-          >
-            <Home size={20} />
-            Video with AI
-          </Link>
-        </div>
+        <Link href="/" className="flex items-center gap-3">
+          <div className="rounded-xl bg-linear-to-r from-violet-600 to-fuchsia-600 p-2">
+            <Video className="h-5 w-5 text-white" />
+          </div>
+
+          <div>
+            <h1 className="text-lg font-bold text-slate-900">ReelsPro</h1>
+
+            <p className="text-xs text-slate-500">AI Video Platform</p>
+          </div>
+        </Link>
 
         {/* Navigation */}
-        <div className="hidden md:flex gap-2">
-          <Link href="/" className="btn btn-ghost">
-            Home
-          </Link>
+        <nav className="hidden items-center gap-2 md:flex">
+          {navItems.map((item) => {
+            const Icon = item.icon;
 
-          {session && (
+            const active = pathname === item.href;
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition ${
+                  active
+                    ? "bg-violet-100 text-violet-700"
+                    : "text-slate-600 hover:bg-slate-100"
+                }`}
+              >
+                <Icon size={18} />
+                {item.name}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Right */}
+        <div className="flex items-center gap-4">
+          {session ? (
             <>
-              <Link href="/dashboard" className="btn btn-ghost">
-                <LayoutDashboard size={18} />
-                Dashboard
-              </Link>
+              <div className="hidden text-right md:block">
+                <p className="text-sm font-semibold text-slate-800">
+                  {session.user?.email?.split("@")[0]}
+                </p>
 
-              <Link href="/upload" className="btn btn-primary">
-                <Upload size={18} />
-                Upload
-              </Link>
-            </>
-          )}
-        </div>
+                <p className="text-xs text-slate-500">{session.user?.email}</p>
+              </div>
 
-        {/* User */}
-        <div className="flex-none">
-          {status === "loading" ? (
-            <span className="loading loading-spinner loading-md"></span>
-          ) : (
-            <div className="dropdown dropdown-end">
-              <button className="btn btn-circle btn-ghost">
-                <User size={20} />
+              <div className="rounded-full bg-violet-100 p-2">
+                <UserCircle2 className="text-violet-600" />
+              </div>
+
+              <button
+                onClick={() =>
+                  signOut({
+                    callbackUrl: "/login",
+                  })
+                }
+                className="flex items-center gap-2 rounded-xl bg-red-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-600"
+              >
+                <LogOut size={18} />
+                Logout
               </button>
-
-              <ul className="menu dropdown-content mt-3 w-72 rounded-box bg-base-100 shadow-lg border p-2">
-                {session ? (
-                  <>
-                    <li className="pointer-events-none">
-                      <span className="font-semibold">
-                        {session.user?.email}
-                      </span>
-                    </li>
-
-                    <li>
-                      <Link href="/dashboard">
-                        <LayoutDashboard size={18} />
-                        Dashboard
-                      </Link>
-                    </li>
-
-                    <li>
-                      <Link href="/upload">
-                        <Upload size={18} />
-                        Upload Video
-                      </Link>
-                    </li>
-
-                    <div className="divider my-1"></div>
-
-                    <li>
-                      <button onClick={handleSignOut} className="text-error">
-                        Sign Out
-                      </button>
-                    </li>
-                  </>
-                ) : (
-                  <li>
-                    <Link
-                      href="/login"
-                      onClick={() =>
-                        showNotification("Please sign in to continue.", "info")
-                      }
-                    >
-                      Login
-                    </Link>
-                  </li>
-                )}
-              </ul>
-            </div>
+            </>
+          ) : (
+            <Link
+              href="/login"
+              className="rounded-xl bg-violet-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-violet-700"
+            >
+              Login
+            </Link>
           )}
         </div>
       </div>

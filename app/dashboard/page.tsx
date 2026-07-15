@@ -61,7 +61,7 @@ export default function Dashboard() {
         {/* Top Section */}
 
         <div className="mx-auto max-w-7xl px-6 py-10">
-          <div className="mb-10 flex flex-col justify-between gap-5 md:flex-row md:items-center">
+          {/* <div className="mb-10 flex flex-col justify-between gap-5 md:flex-row md:items-center">
             <div>
               <h1 className="text-4xl font-bold text-slate-900">Welcome</h1>
 
@@ -75,7 +75,7 @@ export default function Dashboard() {
               <LogOut size={18} />
               Logout
             </button>
-          </div>
+          </div> */}
 
           {/* Statistics */}
 

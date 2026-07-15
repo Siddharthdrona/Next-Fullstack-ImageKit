@@ -19,6 +19,7 @@ export default function VideoUploadForm() {
   const [thumbnailUrl, setThumbnailUrl] = useState("");
 
   const [progress, setProgress] = useState(0);
+
   const [loading, setLoading] = useState(false);
 
   const handleVideoUpload = (res: unknown) => {
@@ -34,30 +35,15 @@ export default function VideoUploadForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!title.trim()) {
-      alert("Please enter a title.");
-      return;
-    }
-
-    if (!description.trim()) {
-      alert("Please enter a description.");
-      return;
-    }
-
     if (!videoUrl) {
       alert("Please upload a video.");
-      return;
-    }
-
-    if (!thumbnailUrl) {
-      alert("Please upload a thumbnail.");
       return;
     }
 
     setLoading(true);
 
     try {
-      const res = await fetch("/api/videos", {
+      const res = await fetch("/api/video", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -74,17 +60,10 @@ export default function VideoUploadForm() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Upload failed");
+        throw new Error(data.error);
       }
 
       alert("Video uploaded successfully!");
-
-      // Reset form
-      setTitle("");
-      setDescription("");
-      setVideoUrl("");
-      setThumbnailUrl("");
-      setProgress(0);
 
       router.push("/dashboard");
       router.refresh();
@@ -97,7 +76,7 @@ export default function VideoUploadForm() {
   }
 
   return (
-    <div className="mx-auto mt-10 max-w-2xl rounded-2xl border border-slate-200 bg-white p-8 shadow-lg">
+    <div className="mx-auto mt-10 max-w-2xl rounded-2xl border border-slate-200 bg-white p-8 shadow-xl">
       <h1 className="mb-8 text-3xl font-bold text-slate-900">
         Upload New Video
       </h1>
@@ -105,37 +84,39 @@ export default function VideoUploadForm() {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Title */}
         <div>
-          <label className="mb-2 block font-medium text-slate-700">Title</label>
+          <label className="mb-2 block text-sm font-semibold text-slate-700">
+            Video Title
+          </label>
 
           <input
             type="text"
             placeholder="Enter video title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 p-3 outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-200"
+            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
             required
           />
         </div>
 
         {/* Description */}
         <div>
-          <label className="mb-2 block font-medium text-slate-700">
+          <label className="mb-2 block text-sm font-semibold text-slate-700">
             Description
           </label>
 
           <textarea
-            rows={4}
-            placeholder="Enter video description"
+            rows={5}
+            placeholder="Describe your video..."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 p-3 outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-200"
+            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
             required
           />
         </div>
 
-        {/* Video Upload */}
+        {/* Upload Video */}
         <div>
-          <label className="mb-2 block font-medium text-slate-700">
+          <label className="mb-2 block text-sm font-semibold text-slate-700">
             Upload Video
           </label>
 
@@ -147,11 +128,12 @@ export default function VideoUploadForm() {
 
           {progress > 0 && (
             <div className="mt-4">
-              <progress
-                className="progress progress-primary w-full"
-                value={progress}
-                max={100}
-              />
+              <div className="h-3 w-full overflow-hidden rounded-full bg-slate-200">
+                <div
+                  className="h-full rounded-full bg-violet-600 transition-all"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
 
               <p className="mt-2 text-sm text-slate-600">
                 {progress}% Uploaded
@@ -166,9 +148,9 @@ export default function VideoUploadForm() {
           )}
         </div>
 
-        {/* Thumbnail Upload */}
+        {/* Upload Thumbnail */}
         <div>
-          <label className="mb-2 block font-medium text-slate-700">
+          <label className="mb-2 block text-sm font-semibold text-slate-700">
             Upload Thumbnail
           </label>
 
@@ -181,7 +163,7 @@ export default function VideoUploadForm() {
           )}
         </div>
 
-        {/* Submit Button */}
+        {/* Submit */}
         <button
           type="submit"
           disabled={
