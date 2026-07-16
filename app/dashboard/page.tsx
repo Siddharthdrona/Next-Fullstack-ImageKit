@@ -61,22 +61,7 @@ export default function Dashboard() {
         {/* Top Section */}
 
         <div className="mx-auto max-w-7xl px-6 py-10">
-          {/* <div className="mb-10 flex flex-col justify-between gap-5 md:flex-row md:items-center">
-            <div>
-              <h1 className="text-4xl font-bold text-slate-900">Welcome</h1>
-
-              <p className="mt-2 text-slate-500">{session?.user?.email}</p>
-            </div>
-
-            <button
-              onClick={() => signOut({ callbackUrl: "/login" })}
-              className="flex items-center gap-2 rounded-xl bg-red-500 px-5 py-3 text-white hover:bg-red-600"
-            >
-              <LogOut size={18} />
-              Logout
-            </button>
-          </div> */}
-
+          
           {/* Statistics */}
 
           <div className="grid gap-6 md:grid-cols-2">
